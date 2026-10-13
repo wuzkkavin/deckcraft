@@ -7,6 +7,7 @@ use egui::{Align2, Color32, CornerRadius, Rect, Sense, Stroke, Ui, WidgetInfo, W
 use serde_json::json;
 
 use crate::SlideApp;
+use crate::i18n::tr;
 use crate::icons::{self, Icon};
 use crate::theme::{self, Tokens};
 
@@ -144,31 +145,31 @@ fn section_header(app: &mut SlideApp, ui: &mut Ui, h: &Header<'_>) -> Rect {
     let index = h.index;
     let name = h.name.to_string();
     resp.context_menu(|ui| {
-        if ui.button("Rename Section…").clicked() {
+        if ui.button(tr("Rename Section…")).clicked() {
             let mut d = crate::dialogs::Dialog::new("renameSection");
             d.params = json!({"index": index, "name": name});
             app.dialog = Some(d);
             ui.close();
         }
-        if ui.button("Add Section").clicked() {
+        if ui.button(tr("Add Section")).clicked() {
             if let Some(at) = app.session.active().map(|st| st.selection.slide) {
                 let _ = app.run("section.add", json!({"at": at}));
             }
             ui.close();
         }
-        if ui.button("Remove Section").clicked() {
+        if ui.button(tr("Remove Section")).clicked() {
             let _ = app.run("section.remove", json!({"index": index}));
             ui.close();
         }
-        if ui.button("Remove Section & Slides").clicked() {
+        if ui.button(tr("Remove Section & Slides")).clicked() {
             let _ = app.run("section.remove", json!({"index": index, "slides": true}));
             ui.close();
         }
-        if ui.button("Move Section Up").clicked() {
+        if ui.button(tr("Move Section Up")).clicked() {
             let _ = app.run("section.move", json!({"index": index, "to": index.saturating_sub(1)}));
             ui.close();
         }
-        if ui.button("Move Section Down").clicked() {
+        if ui.button(tr("Move Section Down")).clicked() {
             let _ = app.run("section.move", json!({"index": index, "to": index + 1}));
             ui.close();
         }
@@ -276,7 +277,7 @@ pub fn show(app: &mut SlideApp, ui: &mut Ui) {
         ui.add_space(12.0);
         ui.horizontal(|ui| {
             ui.add_space(24.0);
-            if ui.add(egui::Button::new("Add Section").stroke(Stroke::new(1.0, t.border))).clicked() {
+            if ui.add(egui::Button::new(tr("Add Section")).stroke(Stroke::new(1.0, t.border))).clicked() {
                 let _ = app.run("section.add", json!({"at": cur}));
             }
         });
@@ -417,7 +418,7 @@ pub fn notes_page(app: &mut SlideApp, ui: &mut Ui) {
     let look = crate::notes::Look { size: 14.0, color: Some(Color32::from_gray(30)) };
     let width = notes_rect.width();
     let r = crate::notes::editor(&mut child, &mut draft, &look, |e| {
-        e.id(edit_id).hint_text("Click to add text").desired_width(width).desired_rows(12).frame(egui::Frame::NONE)
+        e.id(edit_id).hint_text(tr("Click to add text")).desired_width(width).desired_rows(12).frame(egui::Frame::NONE)
     })
     .response
     .response;

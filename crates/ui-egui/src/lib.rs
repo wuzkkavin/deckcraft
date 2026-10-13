@@ -15,6 +15,7 @@ pub mod dialogs;
 pub mod doc_window;
 pub mod eyedropper;
 pub mod fillui;
+pub mod i18n;
 pub mod icons;
 pub mod media;
 pub mod menus;
@@ -191,7 +192,7 @@ fn command_for(purpose: FilePurpose, name: &str, bytes: &[u8]) -> Result<&'stati
         FilePurpose::Open => open_command(name),
         FilePurpose::Infer => infer_command(name, bytes),
     };
-    cmd.ok_or_else(|| format!("{name}: DeckCraft can't open this kind of file"))
+    cmd.ok_or_else(|| crate::trf!("{}: DeckCraft can't open this kind of file", name))
 }
 
 /// How long a transient status message stays visible.
@@ -274,6 +275,8 @@ pub struct UiState {
     pub comment_focus: Option<(usize, usize)>,
     /// Quick Access Toolbar buttons, left to right.
     pub qat: Vec<qat::QatItem>,
+    /// Interface language tag (`en`, `zh-Hant`); see [`i18n`]. Defaults to the detected language.
+    pub language: String,
 }
 
 impl Default for UiState {
@@ -305,6 +308,7 @@ impl Default for UiState {
             grayscale: false,
             comment_focus: None,
             qat: qat::defaults(),
+            language: i18n::Lang::detect().code().into(),
         }
     }
 }
@@ -484,6 +488,8 @@ pub struct SlideApp {
     styled: bool,
     restyle: bool,
     fonts_ready: bool,
+    /// The `UiState::language` value last pushed into [`i18n`]'s global state.
+    language_applied: String,
     last_time: f64,
     /// When AutoRecover data was last written (seconds, egui time).
     pub last_recovery: f64,
@@ -567,6 +573,7 @@ impl SlideApp {
             styled: false,
             restyle: true,
             fonts_ready: false,
+            language_applied: String::new(),
             last_time: 0.0,
             last_recovery: 0.0,
             quit_confirmed: false,
@@ -747,7 +754,7 @@ impl SlideApp {
             "deckcraft" => ("deckcraft", "deckcraft", false),
             "gif" => ("gif", "gif", false),
             other => {
-                self.set_status(format!("DeckCraft can't export “{other}”"));
+                self.set_status(crate::trf!("DeckCraft can't export “{}”", other));
                 return false;
             }
         };
@@ -760,7 +767,7 @@ impl SlideApp {
             }
             return match self.run("file.export", params) {
                 Ok(_) => {
-                    self.set_status(format!("Exported {path}"));
+                    self.set_status(crate::trf!("Exported {}", path));
                     true
                 }
                 Err(_) => false,
@@ -798,7 +805,7 @@ impl SlideApp {
                 false
             }
             (Ok(_), None) => {
-                self.set_status("Saving a copy needs a file picker, which this window doesn't have.");
+                self.set_status(i18n::tr("Saving a copy needs a file picker, which this window doesn't have."));
                 false
             }
         }
@@ -824,7 +831,7 @@ impl SlideApp {
         match self.run("file.export", params) {
             Ok(_) => {
                 self.open_url(&format!("file:///{}", path.replace('\\', "/").trim_start_matches('/')));
-                self.set_status("Opened the presentation as a PDF to print");
+                self.set_status(i18n::tr("Opened the presentation as a PDF to print"));
                 true
             }
             Err(_) => false,
@@ -1286,7 +1293,7 @@ impl SlideApp {
             if let Some(path) = pick(&suggested) {
                 match self.session.execute("file.saveAs", &json!({"path": path})) {
                     Ok(_) => {
-                        self.set_status(format!("Saved {path}"));
+                        self.set_status(crate::trf!("Saved {}", path));
                         self.ui.recent.retain(|p| *p != path);
                         self.ui.recent.insert(0, path);
                     }
@@ -1320,7 +1327,7 @@ impl SlideApp {
     pub fn save(&mut self) {
         if self.session.active().and_then(|d| d.path.clone()).is_some() {
             match self.session.execute("file.save", &json!({})) {
-                Ok(_) => self.set_status("Saved"),
+                Ok(_) => self.set_status(i18n::tr("Saved")),
                 Err(e) => self.set_status(e.to_string()),
             }
         } else {
@@ -1542,6 +1549,15 @@ impl SlideApp {
         if (ctx.zoom_factor() - scale).abs() > 1e-3 {
             ctx.set_zoom_factor(scale);
         }
+        // Keep the translation layer in step with the persisted language choice: the host loads
+        // the UI state after `new`, and Preferences rewrites it while running.
+        if self.language_applied != self.ui.language {
+            self.language_applied = self.ui.language.clone();
+            if let Some(l) = i18n::Lang::parse(&self.ui.language) {
+                i18n::set_lang(l);
+            }
+            self.styled = false;
+        }
         if !self.styled {
             theme::install_fonts_with(ctx, &self.ui_fonts.faces);
             self.styled = true;
@@ -1586,7 +1602,7 @@ impl SlideApp {
             if self.session.documents().iter().any(|d| d.is_dirty())
                 && let Err(e) = self.session.execute("file.recovery.save", &json!({}))
             {
-                self.set_status(format!("Couldn't save AutoRecover information: {e}"));
+                self.set_status(crate::trf!("Couldn't save AutoRecover information: {}", e));
             }
         }
         // On the web, dropped files can only be read asynchronously: the host reads them and

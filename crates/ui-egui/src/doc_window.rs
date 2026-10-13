@@ -9,6 +9,7 @@ use egui::{Color32, CornerRadius, Rect, RichText, pos2, vec2};
 use serde_json::{Value, json};
 
 use crate::SlideApp;
+use crate::i18n::tr;
 
 /// The extra window. `uid` is the presentation it was opened on.
 pub struct DocWindow {
@@ -25,10 +26,10 @@ pub fn command(app: &mut SlideApp, p: &Value) -> Result<Value, String> {
         return Ok(json!({"open": false}));
     }
     let (uid, n, title, editor_slide) = {
-        let active = app.session.active().ok_or("New Window needs an open presentation")?;
+        let active = app.session.active().ok_or_else(|| tr("New Window needs an open presentation").to_string())?;
         let n = active.doc.slides.len();
         if n == 0 {
-            return Err("New Window needs a slide".into());
+            return Err(tr("New Window needs a slide").into());
         }
         (active.uid, n, window_title(&active.title()), active.selection.slide.min(n - 1))
     };
@@ -94,12 +95,12 @@ pub fn show(app: &mut SlideApp, ctx: &egui::Context) {
                         ui.horizontal_centered(|ui| {
                             ui.label(RichText::new(title.clone()).font(crate::theme::bold(13.0)).color(t.text));
                             ui.add_space(16.0);
-                            ui.label(RichText::new(format!("Slide {} of {n}", slide + 1)).color(t.text_dim).font(crate::theme::font(13.0)));
+                            ui.label(RichText::new(crate::trf!("Slide {} of {}", slide + 1, n)).color(t.text_dim).font(crate::theme::font(13.0)));
                             ui.with_layout(egui::Layout::right_to_left(egui::Align::Center), |ui| {
-                                if ui.add_enabled(slide + 1 < n, egui::Button::new("Next")).clicked() {
+                                if ui.add_enabled(slide + 1 < n, egui::Button::new(tr("Next"))).clicked() {
                                     let _ = app.run("view.newWindow", json!({"delta": 1}));
                                 }
-                                if ui.add_enabled(slide > 0, egui::Button::new("Previous")).clicked() {
+                                if ui.add_enabled(slide > 0, egui::Button::new(tr("Previous"))).clicked() {
                                     let _ = app.run("view.newWindow", json!({"delta": -1}));
                                 }
                             });
