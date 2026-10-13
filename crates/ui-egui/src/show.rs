@@ -10,6 +10,7 @@ use egui::{Align2, Color32, CornerRadius, Mesh, Pos2, Rect, Sense, Stroke, Textu
 use serde_json::json;
 
 use crate::SlideApp;
+use crate::i18n::tr;
 use crate::theme;
 
 pub struct Show {
@@ -688,7 +689,7 @@ pub fn ui(app: &mut SlideApp, ui: &mut Ui) {
         painter.text(
             pos2(full.center().x, full.min.y + 40.0),
             Align2::CENTER_CENTER,
-            "End of slide show, click to exit.",
+            tr("End of slide show, click to exit."),
             theme::font(18.0),
             Color32::from_gray(200),
         );
@@ -954,7 +955,7 @@ pub fn ui(app: &mut SlideApp, ui: &mut Ui) {
         painter.text(
             pos2(bar.min.x + 14.0, bar.center().y),
             Align2::LEFT_CENTER,
-            format!("Slide {} of {}", show.state.slide + 1, doc.slides.len()),
+            crate::trf!("Slide {} of {}", show.state.slide + 1, doc.slides.len()),
             theme::font(12.0),
             Color32::from_gray(200),
         );
@@ -1051,7 +1052,7 @@ pub fn ui(app: &mut SlideApp, ui: &mut Ui) {
             for (i, secs) in show.timings.clone() {
                 let _ = app.run("transition.timing", json!({"index": i, "after": (secs * 1000.0).round() as u64}));
             }
-            app.set_status("Slide timings recorded.");
+            app.set_status(tr("Slide timings recorded."));
         }
         let last = show.state.slide;
         let _ = app.run("slide.go", json!({"index": last}));
@@ -1754,7 +1755,7 @@ fn presenter_window(ctx: &egui::Context, show: &mut Show, doc: &Presentation, no
     };
     ctx.show_viewport_immediate(
         egui::ViewportId::from_hash_of("deckcraft_presenter"),
-        egui::ViewportBuilder::default().with_title("Presenter View — DeckCraft").with_inner_size([1100.0, 700.0]),
+        egui::ViewportBuilder::default().with_title(tr("Presenter View — DeckCraft")).with_inner_size([1100.0, 700.0]),
         |ui, _| {
             if !keyboard(ui.ctx(), show, doc, now) {
                 *keep = false;
@@ -1772,15 +1773,15 @@ fn presenter_window(ctx: &egui::Context, show: &mut Show, doc: &Presentation, no
                     ui.add_space(12.0);
                     ui.label(egui::RichText::new(clock.clone()).size(16.0).color(Color32::from_gray(200)));
                     ui.add_space(20.0);
-                    ui.label(egui::RichText::new(format!("Slide {} of {}", cur + 1, doc.slides.len())).size(16.0).color(Color32::from_gray(200)));
+                    ui.label(egui::RichText::new(crate::trf!("Slide {} of {}", cur + 1, doc.slides.len())).size(16.0).color(Color32::from_gray(200)));
                     ui.with_layout(egui::Layout::right_to_left(egui::Align::Center), |ui| {
-                        if button(ui, "End Show").clicked() {
+                        if button(ui, tr("End Show")).clicked() {
                             *keep = false;
                         }
-                        if button(ui, "Next ▶").clicked() {
+                        if button(ui, tr("Next ▶")).clicked() {
                             actions.push(show.state.next(doc));
                         }
-                        if button(ui, "◀ Previous").clicked() {
+                        if button(ui, tr("◀ Previous")).clicked() {
                             actions.push(show.state.prev(doc));
                         }
                     });
@@ -1840,13 +1841,13 @@ fn presenter_window(ctx: &egui::Context, show: &mut Show, doc: &Presentation, no
                     }
                     None => {
                         ui.painter().rect_filled(nr, CornerRadius::ZERO, Color32::from_gray(40));
-                        ui.painter().text(nr.center(), Align2::CENTER_CENTER, "End of slide show", theme::font(13.0), Color32::from_gray(170));
+                        ui.painter().text(nr.center(), Align2::CENTER_CENTER, tr("End of slide show"), theme::font(13.0), Color32::from_gray(170));
                     }
                 }
                 let notes_head = Rect::from_min_size(pos2(right.min.x, nr.max.y + 12.0), vec2(right.width(), 28.0));
                 let mut head = ui.new_child(egui::UiBuilder::new().max_rect(notes_head));
                 head.horizontal(|ui| {
-                    ui.label(egui::RichText::new("Notes").size(13.0).color(Color32::from_gray(170)));
+                    ui.label(egui::RichText::new(tr("Notes")).size(13.0).color(Color32::from_gray(170)));
                     if ui.button("A-").clicked() {
                         show.nudge_notes(-NOTES_STEP);
                     }
@@ -1859,7 +1860,9 @@ fn presenter_window(ctx: &egui::Context, show: &mut Show, doc: &Presentation, no
                 let mut child = ui.new_child(egui::UiBuilder::new().max_rect(notes_rect));
                 egui::ScrollArea::vertical().show(&mut child, |ui| {
                     ui.label(
-                        egui::RichText::new(if notes.is_empty() { "No notes." } else { &notes }).size(show.notes_px).color(Color32::from_gray(230)),
+                        egui::RichText::new(if notes.is_empty() { tr("No notes.") } else { &notes })
+                            .size(show.notes_px)
+                            .color(Color32::from_gray(230)),
                     );
                 });
             });
