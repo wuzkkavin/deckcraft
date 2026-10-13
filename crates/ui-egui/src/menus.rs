@@ -5,6 +5,7 @@ use deckcraft_engine::Mods;
 use serde_json::json;
 
 use crate::SlideApp;
+use crate::i18n::{tr, tr_id};
 use crate::theme::{self, Tokens};
 
 /// Shortcuts the UI handles itself (views, show, zoom, palette, file dialogs). True when consumed.
@@ -63,9 +64,12 @@ pub fn palette(app: &mut SlideApp, ctx: &egui::Context) {
         .anchor(egui::Align2::CENTER_TOP, egui::vec2(0.0, 90.0))
         .fixed_size(egui::vec2(520.0, 380.0))
         .show(ctx, |ui| {
-            let r = ui.add(egui::TextEdit::singleline(&mut query).hint_text("Search commands…").desired_width(f32::INFINITY).font(theme::font(15.0)));
+            let r =
+                ui.add(egui::TextEdit::singleline(&mut query).hint_text(tr("Search commands…")).desired_width(f32::INFINITY).font(theme::font(15.0)));
             r.request_focus();
             let q = query.to_lowercase();
+            // Labels show translated (by command id where the catalogue has an entry); the search
+            // matches the English label, the translation and the id alike.
             let mut items: Vec<(String, String, Option<&'static str>)> = app
                 .session
                 .commands()
@@ -73,7 +77,16 @@ pub fn palette(app: &mut SlideApp, ctx: &egui::Context) {
                 .filter(|c| c.enabled)
                 .map(|c| (c.id.to_string(), c.label.to_string(), c.shortcut))
                 .chain(crate::UI_COMMANDS.iter().map(|c| (c.0.to_string(), c.1.to_string(), c.2)))
-                .filter(|(id, label, _)| q.is_empty() || label.to_lowercase().contains(&q) || id.to_lowercase().contains(&q))
+                .filter(|(id, label, _)| {
+                    q.is_empty()
+                        || label.to_lowercase().contains(&q)
+                        || tr_id(id, label).to_lowercase().contains(&q)
+                        || id.to_lowercase().contains(&q)
+                })
+                .map(|(id, label, sc)| {
+                    let shown = tr_id(&id, &label).to_string();
+                    (id, shown, sc)
+                })
                 .collect();
             items.sort_by_key(|(_, l, _)| !l.to_lowercase().starts_with(&q));
             items.truncate(60);
@@ -128,120 +141,120 @@ pub fn palette(app: &mut SlideApp, ctx: &egui::Context) {
 pub fn menu_tree() -> Vec<(&'static str, Vec<(&'static str, &'static str)>)> {
     vec![
         (
-            "File",
+            tr("File"),
             vec![
-                ("New Presentation", "file.new"),
-                ("Open…", "app.openDialog"),
+                (tr("New Presentation"), "file.new"),
+                (tr("Open…"), "app.openDialog"),
                 ("-", ""),
-                ("Close", "file.close"),
-                ("Save", "file.save"),
-                ("Save As…", "app.saveAsDialog"),
-                ("Export…", "app.exportDialog"),
+                (tr("Close"), "file.close"),
+                (tr("Save"), "file.save"),
+                (tr("Save As…"), "app.saveAsDialog"),
+                (tr("Export…"), "app.exportDialog"),
                 ("-", ""),
-                ("Properties", "file.properties"),
+                (tr("Properties"), "file.properties"),
             ],
         ),
         (
-            "Edit",
+            tr("Edit"),
             vec![
-                ("Undo", "edit.undo"),
-                ("Redo", "edit.redo"),
+                (tr("Undo"), "edit.undo"),
+                (tr("Redo"), "edit.redo"),
                 ("-", ""),
-                ("Cut", "edit.cut"),
-                ("Copy", "edit.copy"),
-                ("Paste", "edit.paste"),
-                ("Paste and Match Formatting", "edit.pasteText"),
+                (tr("Cut"), "edit.cut"),
+                (tr("Copy"), "edit.copy"),
+                (tr("Paste"), "edit.paste"),
+                (tr("Paste and Match Formatting"), "edit.pasteText"),
                 ("-", ""),
-                ("Select All", "edit.selectAll"),
-                ("Duplicate", "edit.duplicate"),
-                ("Delete Slide", "slide.delete"),
+                (tr("Select All"), "edit.selectAll"),
+                (tr("Duplicate"), "edit.duplicate"),
+                (tr("Delete Slide"), "slide.delete"),
                 ("-", ""),
-                ("Find…", "app.palette"),
+                (tr("Find…"), "app.palette"),
             ],
         ),
         (
-            "View",
+            tr("View"),
             vec![
-                ("Normal", "view.normal"),
-                ("Slide Sorter", "view.sorter"),
-                ("Notes Page", "view.notesPage"),
-                ("Outline View", "view.outline"),
-                ("Reading View", "view.reading"),
-                ("Slide Show", "show.start"),
+                (tr("Normal"), "view.normal"),
+                (tr("Slide Sorter"), "view.sorter"),
+                (tr("Notes Page"), "view.notesPage"),
+                (tr("Outline View"), "view.outline"),
+                (tr("Reading View"), "view.reading"),
+                (tr("Slide Show"), "show.start"),
                 ("-", ""),
-                ("Slide Master", "view.slideMaster"),
+                (tr("Slide Master"), "view.slideMaster"),
                 ("-", ""),
-                ("Ruler", "view.ruler"),
-                ("Gridlines", "view.gridlines"),
-                ("Guides", "view.guides"),
+                (tr("Ruler"), "view.ruler"),
+                (tr("Gridlines"), "view.gridlines"),
+                (tr("Guides"), "view.guides"),
                 ("-", ""),
-                ("Zoom In", "view.zoomIn"),
-                ("Zoom Out", "view.zoomOut"),
-                ("Fit to Window", "view.fit"),
+                (tr("Zoom In"), "view.zoomIn"),
+                (tr("Zoom Out"), "view.zoomOut"),
+                (tr("Fit to Window"), "view.fit"),
             ],
         ),
         (
-            "Insert",
+            tr("Insert"),
             vec![
-                ("New Slide", "slide.new"),
-                ("Duplicate Slide", "slide.duplicate"),
+                (tr("New Slide"), "slide.new"),
+                (tr("Duplicate Slide"), "slide.duplicate"),
                 ("-", ""),
-                ("Section", "section.add"),
-                ("Text Box", "insert.textBox"),
-                ("WordArt", "insert.wordArt"),
-                ("Date and Time", "insert.dateTime"),
-                ("Slide Number", "insert.slideNumber"),
+                (tr("Section"), "section.add"),
+                (tr("Text Box"), "insert.textBox"),
+                (tr("WordArt"), "insert.wordArt"),
+                (tr("Date and Time"), "insert.dateTime"),
+                (tr("Slide Number"), "insert.slideNumber"),
                 ("-", ""),
-                ("Table…", "insert.table"),
-                ("Chart", "insert.chart"),
-                ("Picture from File…", "app.insertPictureDialog"),
-                ("Audio from File…", "app.insertAudioDialog"),
-                ("Video from File…", "app.insertVideoDialog"),
+                (tr("Table…"), "insert.table"),
+                (tr("Chart"), "insert.chart"),
+                (tr("Picture from File…"), "app.insertPictureDialog"),
+                (tr("Audio from File…"), "app.insertAudioDialog"),
+                (tr("Video from File…"), "app.insertVideoDialog"),
             ],
         ),
         (
-            "Format",
+            tr("Format"),
             vec![
-                ("Bold", "format.bold"),
-                ("Italic", "format.italic"),
-                ("Underline", "format.underline"),
+                (tr("Bold"), "format.bold"),
+                (tr("Italic"), "format.italic"),
+                (tr("Underline"), "format.underline"),
                 ("-", ""),
-                ("Align Left", "format.alignLeft"),
-                ("Center", "format.alignCenter"),
-                ("Align Right", "format.alignRight"),
-                ("Justify", "format.justify"),
+                (tr("Align Left"), "format.alignLeft"),
+                (tr("Center"), "format.alignCenter"),
+                (tr("Align Right"), "format.alignRight"),
+                (tr("Justify"), "format.justify"),
                 ("-", ""),
-                ("Right-to-Left Text Direction", "format.rtl"),
+                (tr("Right-to-Left Text Direction"), "format.rtl"),
             ],
         ),
         (
-            "Arrange",
+            tr("Arrange"),
             vec![
-                ("Bring to Front", "arrange.bringToFront"),
-                ("Send to Back", "arrange.sendToBack"),
-                ("Bring Forward", "arrange.bringForward"),
-                ("Send Backward", "arrange.sendBackward"),
+                (tr("Bring to Front"), "arrange.bringToFront"),
+                (tr("Send to Back"), "arrange.sendToBack"),
+                (tr("Bring Forward"), "arrange.bringForward"),
+                (tr("Send Backward"), "arrange.sendBackward"),
                 ("-", ""),
-                ("Group", "arrange.group"),
-                ("Ungroup", "arrange.ungroup"),
-                ("Regroup", "arrange.regroup"),
+                (tr("Group"), "arrange.group"),
+                (tr("Ungroup"), "arrange.ungroup"),
+                (tr("Regroup"), "arrange.regroup"),
                 ("-", ""),
-                ("Rotate Left 90°", "arrange.rotateLeft"),
-                ("Rotate Right 90°", "arrange.rotateRight"),
-                ("Flip Horizontal", "arrange.flipHorizontal"),
-                ("Flip Vertical", "arrange.flipVertical"),
+                (tr("Rotate Left 90°"), "arrange.rotateLeft"),
+                (tr("Rotate Right 90°"), "arrange.rotateRight"),
+                (tr("Flip Horizontal"), "arrange.flipHorizontal"),
+                (tr("Flip Vertical"), "arrange.flipVertical"),
             ],
         ),
         (
-            "Slide Show",
+            tr("Slide Show"),
             vec![
-                ("Play from Start", "show.fromStart"),
-                ("Play from Current Slide", "show.fromCurrent"),
+                (tr("Play from Start"), "show.fromStart"),
+                (tr("Play from Current Slide"), "show.fromCurrent"),
                 ("-", ""),
-                ("Hide Slide", "slide.hide"),
-                ("Set Up Show…", "show.setup"),
+                (tr("Hide Slide"), "slide.hide"),
+                (tr("Set Up Show…"), "show.setup"),
             ],
         ),
-        ("Help", vec![("About DeckCraft", "app.about"), ("Command Palette", "app.palette")]),
+        (tr("Help"), vec![(tr("About DeckCraft"), "app.about"), (tr("Command Palette"), "app.palette")]),
     ]
 }

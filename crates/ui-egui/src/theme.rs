@@ -174,6 +174,17 @@ pub fn install_fonts(ctx: &egui::Context) {
             list.insert(k, n.clone());
         }
     }
+    // This fork bundles jf open huninn (a Taiwanese Traditional Chinese face, OFL-1.1) and leads
+    // the UI family with it in Traditional Chinese, so the interface renders in Traditional glyph
+    // forms on every platform — the web included, where no system CJK font may exist. (Upstream
+    // keeps fonts in craft-fonts only; see the fork's note in ATTRIBUTION.md.)
+    if crate::i18n::lang() == crate::i18n::Lang::ZhHant {
+        const HUNINN: &[u8] = include_bytes!("../../../assets/fonts/jf-openhuninn-2.1.ttf");
+        defs.font_data.insert("jf-openhuninn".into(), std::sync::Arc::new(FontData::from_static(HUNINN)));
+        if let Some(list) = defs.families.get_mut(&FontFamily::Proportional) {
+            list.insert(0, "jf-openhuninn".into());
+        }
+    }
     // A bold family for headings and selected tabs.
     let mut bold: Vec<String> = names.iter().filter(|(fam, st, _)| *fam == "Inter" && *st == "SemiBold").map(|(_, _, n)| n.clone()).collect();
     bold.extend(defs.families.get(&FontFamily::Proportional).cloned().unwrap_or_default());

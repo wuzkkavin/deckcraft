@@ -11,6 +11,7 @@ pub mod control;
 pub mod credits;
 pub mod dialogs;
 pub mod fillui;
+pub mod i18n;
 pub mod icons;
 pub mod media;
 pub mod menus;
@@ -98,6 +99,8 @@ pub struct UiState {
     /// Format Shape pane: tab (`fill`, `effects`, `size`, `picture`, `text`).
     pub format_tab: String,
     pub grayscale: bool,
+    /// Interface language tag (`en`, `zh-Hant`); see [`i18n`]. Defaults to the detected language.
+    pub language: String,
 }
 
 impl Default for UiState {
@@ -123,6 +126,7 @@ impl Default for UiState {
             ui_scale: 1.0,
             format_tab: "fill".into(),
             grayscale: false,
+            language: i18n::Lang::detect().code().into(),
         }
     }
 }
@@ -201,6 +205,8 @@ pub struct SlideApp {
     styled: bool,
     restyle: bool,
     fonts_ready: bool,
+    /// The `UiState::language` value last pushed into [`i18n`]'s global state.
+    language_applied: String,
     last_time: f64,
     /// When AutoRecover data was last written (seconds, egui time).
     pub last_recovery: f64,
@@ -239,6 +245,7 @@ impl SlideApp {
             styled: false,
             restyle: true,
             fonts_ready: false,
+            language_applied: String::new(),
             last_time: 0.0,
             last_recovery: 0.0,
             quit_confirmed: false,
@@ -418,7 +425,7 @@ impl SlideApp {
             if let Some(path) = pick(&suggested) {
                 match self.session.execute("file.saveAs", &json!({"path": path})) {
                     Ok(_) => {
-                        self.set_status(format!("Saved {path}"));
+                        self.set_status(crate::trf!("Saved {}", path));
                         self.ui.recent.retain(|p| *p != path);
                         self.ui.recent.insert(0, path);
                     }
@@ -452,7 +459,7 @@ impl SlideApp {
     pub fn save(&mut self) {
         if self.session.active().and_then(|d| d.path.clone()).is_some() {
             match self.session.execute("file.save", &json!({})) {
-                Ok(_) => self.set_status("Saved"),
+                Ok(_) => self.set_status(i18n::tr("Saved")),
                 Err(e) => self.set_status(e.to_string()),
             }
         } else {
@@ -516,7 +523,7 @@ impl SlideApp {
         } else if lower.ends_with(".txt") || lower.ends_with(".md") {
             "slide.fromOutline"
         } else {
-            self.set_status(format!("{name}: DeckCraft can't open this kind of file"));
+            self.set_status(crate::trf!("{}: DeckCraft can't open this kind of file", name));
             return;
         };
         let p = if cmd == "slide.fromOutline" { json!({"text": String::from_utf8_lossy(bytes)}) } else { json!({"name": name, "data": data}) };
@@ -533,6 +540,15 @@ impl SlideApp {
         let scale = self.ui.ui_scale.clamp(0.5, 3.0);
         if (ctx.zoom_factor() - scale).abs() > 1e-3 {
             ctx.set_zoom_factor(scale);
+        }
+        // Keep the translation layer in step with the persisted language choice: the host loads
+        // the UI state after `new`, and Preferences rewrites it while running.
+        if self.language_applied != self.ui.language {
+            self.language_applied = self.ui.language.clone();
+            if let Some(l) = i18n::Lang::parse(&self.ui.language) {
+                i18n::set_lang(l);
+            }
+            self.styled = false;
         }
         if !self.styled {
             theme::install_fonts(ctx);
@@ -574,7 +590,7 @@ impl SlideApp {
             if self.session.documents().iter().any(|d| d.is_dirty())
                 && let Err(e) = self.session.execute("file.recovery.save", &json!({}))
             {
-                self.set_status(format!("Couldn't save AutoRecover information: {e}"));
+                self.set_status(crate::trf!("Couldn't save AutoRecover information: {}", e));
             }
         }
         // On the web, dropped files can only be read asynchronously: the host reads them and
@@ -882,6 +898,7 @@ mod tests {
     #![allow(clippy::unwrap_used, clippy::expect_used)]
 
     use super::*;
+    use egui_kittest::kittest::Queryable as _;
 
     fn title_text(app: &SlideApp) -> String {
         let d = app.session.active().unwrap();
@@ -937,5 +954,45 @@ mod tests {
         let mut app = SlideApp::new(Session::new(), Services::default());
         app.run("app.home", json!({})).unwrap();
         assert!(!app.home_open() && app.home.is_none(), "with nothing open the start screen shows anyway");
+    }
+
+    /// This fork's Traditional Chinese UI: with the language set to zh-Hant the ribbon commands
+    /// resolve to Chinese through the catalogue, the Preferences dialog renders its controls in
+    /// Chinese, and the English labels are gone. (The ribbon itself is painter-drawn, so its tab
+    /// names are asserted through the same `tr` the tab row draws with; the dialog assertions go
+    /// through the accessibility tree.)
+    #[test]
+    fn traditional_chinese_ui_renders() {
+        // The language is process-wide state; hold the lock so the i18n unit tests cannot flip
+        // it while this test renders.
+        let _lang_guard = i18n::TEST_LANG_LOCK.lock().unwrap_or_else(|e| e.into_inner());
+        let mut harness = egui_kittest::Harness::builder().with_size(egui::vec2(1200.0, 800.0)).build_ui_state(
+            |ui, app: &mut SlideApp| {
+                app.logic(ui.ctx());
+                app.ui(ui);
+            },
+            SlideApp::new(Session::with_new(), Services::default()),
+        );
+        harness.state_mut().ui.language = "zh-Hant".into();
+        harness.run_steps(3);
+        assert_eq!(i18n::lang(), i18n::Lang::ZhHant);
+        // Ribbon tab names and the main commands, through the same lookups the UI uses.
+        assert_eq!(i18n::tr("Home"), "常用");
+        assert_eq!(i18n::tr("Transitions"), "切換");
+        assert_eq!(i18n::tr("Slide Show"), "投影片放映");
+        assert_eq!(i18n::tr_id("edit.cut", "Cut"), "剪下");
+        assert_eq!(i18n::tr_id("file.saveAs", "Save As"), "另存新檔…");
+
+        harness.state_mut().run("app.preferences", json!({})).unwrap();
+        harness.run_steps(3);
+        harness.get_by_label("完成"); // the Done button
+        harness.get_by_label("深色外觀"); // the Dark appearance checkbox
+        assert!(harness.query_by_label("Done").is_none(), "English Done is gone in zh-Hant");
+        assert!(harness.query_by_label("Dark appearance").is_none());
+
+        // Leave the process-wide language as other tests expect it.
+        harness.state_mut().ui.language = "en".into();
+        harness.run_steps(2);
+        i18n::set_lang(i18n::Lang::En);
     }
 }

@@ -9,6 +9,7 @@ use egui::{Align2, Color32, CornerRadius, Mesh, Pos2, Rect, Sense, Stroke, Textu
 use serde_json::json;
 
 use crate::SlideApp;
+use crate::i18n::tr;
 use crate::theme;
 
 pub struct Show {
@@ -555,7 +556,7 @@ pub fn ui(app: &mut SlideApp, ui: &mut Ui) {
         painter.text(
             pos2(bar.min.x + 14.0, bar.center().y),
             Align2::LEFT_CENTER,
-            format!("Slide {} of {}", show.state.slide + 1, doc.slides.len()),
+            crate::trf!("Slide {} of {}", show.state.slide + 1, doc.slides.len()),
             theme::font(12.0),
             Color32::from_gray(200),
         );
@@ -750,7 +751,7 @@ fn presenter_window(ctx: &egui::Context, show: &mut Show, doc: &Presentation, no
     let mut actions = vec![];
     ctx.show_viewport_immediate(
         egui::ViewportId::from_hash_of("deckcraft_presenter"),
-        egui::ViewportBuilder::default().with_title("Presenter View — DeckCraft").with_inner_size([1100.0, 700.0]),
+        egui::ViewportBuilder::default().with_title(tr("Presenter View — DeckCraft")).with_inner_size([1100.0, 700.0]),
         |ui, _| {
             egui::CentralPanel::default().frame(egui::Frame::NONE.fill(Color32::from_gray(24)).inner_margin(egui::Margin::same(16))).show(ui, |ui| {
                 ui.horizontal(|ui| {
@@ -765,15 +766,15 @@ fn presenter_window(ctx: &egui::Context, show: &mut Show, doc: &Presentation, no
                         .color(Color32::WHITE),
                     );
                     ui.add_space(20.0);
-                    ui.label(egui::RichText::new(format!("Slide {} of {}", cur + 1, doc.slides.len())).size(16.0).color(Color32::from_gray(200)));
+                    ui.label(egui::RichText::new(crate::trf!("Slide {} of {}", cur + 1, doc.slides.len())).size(16.0).color(Color32::from_gray(200)));
                     ui.with_layout(egui::Layout::right_to_left(egui::Align::Center), |ui| {
-                        if ui.button("End Show").clicked() {
+                        if ui.button(tr("End Show")).clicked() {
                             *keep = false;
                         }
-                        if ui.button("Next ▶").clicked() {
+                        if ui.button(tr("Next ▶")).clicked() {
                             actions.push(show.state.next(doc));
                         }
-                        if ui.button("◀ Previous").clicked() {
+                        if ui.button(tr("◀ Previous")).clicked() {
                             actions.push(show.state.prev(doc));
                         }
                     });
@@ -804,7 +805,7 @@ fn presenter_window(ctx: &egui::Context, show: &mut Show, doc: &Presentation, no
                 let notes_rect = Rect::from_min_max(pos2(right.min.x, nr.max.y + 16.0), right.max);
                 let mut child = ui.new_child(egui::UiBuilder::new().max_rect(notes_rect));
                 egui::ScrollArea::vertical().show(&mut child, |ui| {
-                    ui.label(egui::RichText::new(if notes.is_empty() { "No notes." } else { &notes }).size(18.0).color(Color32::from_gray(230)));
+                    ui.label(egui::RichText::new(if notes.is_empty() { tr("No notes.") } else { &notes }).size(18.0).color(Color32::from_gray(230)));
                 });
             });
             if ui.input(|i| i.viewport().close_requested()) {

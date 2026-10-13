@@ -2,10 +2,22 @@
 
 > **Last reviewed:** 2026-10-10 · **Last updated:** 2026-10-10 · **Change:** major (created; string count measured from source, PowerPoint's localizations read from its bundle) · **Target:** Microsoft PowerPoint for Mac 16.113 (Microsoft 365)
 
-DeckCraft's interface is English only today: strings are literals in the UI and engine code, with
-no catalog and no language switch. Requests: #15 (follow the system language), #30 and PR #34
+Upstream DeckCraft's interface is English only: strings are literals in the UI and engine code,
+with no catalog and no language switch. Requests: #15 (follow the system language), #30 and PR #34
 (Ukrainian, open). Dimension score: **~8% ready** (estimated: English complete, slide-text script
 support partly there), **55–90 h** to parity plus native-speaker review.
+
+> **This fork (zh-tw branch) adds Traditional Chinese (Taiwan).** A thin translation layer lives
+> entirely in `crates/ui-egui/src/i18n.rs`: UI strings stay English in the code and are translated
+> where they are drawn, from the key-per-English-string catalogue
+> `crates/ui-egui/src/i18n/zh_hant.tsv`; a string with no entry falls back to English. The language
+> is detected from `DECKCRAFT_LANG`, then the locale (Traditional tags — Hant script or TW/HK/MO —
+> resolve to Traditional Chinese), can be switched in Preferences, and persists in the UI state.
+> jf open huninn (OFL-1.1) is embedded by the fork and leads the UI font family in Traditional
+> Chinese so glyphs render in Traditional forms everywhere, the web included (see the fork note in
+> `ATTRIBUTION.md`). First release: the full interface catalogue; slide-placeholder prompts drawn
+> by the render layer and document data (layout/theme/font names, style preset names) remain in
+> their source language by design.
 
 ## How the numbers are measured
 
