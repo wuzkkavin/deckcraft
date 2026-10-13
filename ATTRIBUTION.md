@@ -31,6 +31,18 @@ deck and UI icons are original work of the DeckCraft contributors (drawn or gene
 | `crates/fonts/tests/fixtures/legacy-semibold.ttf` | DeckCraft contributors | a one-glyph Semibold face named like Segoe UI Semibold (its Windows family differs from the typographic one), built by `make_legacy_font.py` (fontTools as the builder only) | CC0-1.0 | Font lookup by Windows family name tests |
 | `crates/fonts/tests/fixtures/legacy-regular.ttf` | DeckCraft contributors | the same family's one-glyph Regular face, built by `make_legacy_font.py` (fontTools as the builder only) | CC0-1.0 | Font lookup by Windows family name tests |
 | `crates/render/tests/fixtures/make_colr_font.py` | DeckCraft contributors | this repository | MIT OR Apache-2.0 | Regenerates the COLR test font |
+| `assets/fonts/jf-openhuninn-2.1.ttf` | justfont inc. | [open-huninn-font](https://github.com/justfont/open-huninn-font) v2.1 | OFL-1.1 (`assets/fonts/jf-openhuninn-OFL.txt`) | Traditional Chinese UI face, embedded by this fork (see the fork note below) |
+| `assets/fonts/jf-openhuninn-OFL.txt` | justfont inc. / SIL International | licence text shipped with the font above | OFL-1.1 | Licence for jf open huninn |
+| `crates/ui-egui/src/i18n/zh_hant.tsv` | Kavin Wu (this fork) | this repository | MIT OR Apache-2.0 | Traditional Chinese (Taiwan) interface translation catalogue |
+
+> **Fork note (Traditional Chinese build).** Upstream keeps every font in
+> [storytold/craft-fonts](https://github.com/storytold/craft-fonts) and never in this repository.
+> This fork deliberately departs from that rule at its owner's direction: the Traditional Chinese
+> interface needs a Traditional-glyph CJK face available on every platform — the web included,
+> where no system CJK font may exist — so jf open huninn (OFL-1.1, a Taiwanese typeface) is
+> embedded from `assets/fonts/` and leads the UI font family only while the interface language is
+> Traditional Chinese. The translation layer itself (`crates/ui-egui/src/i18n.rs` and the TSV
+> catalogue above) likewise lives only in this fork.
 
 ## Bundled through dependencies
 

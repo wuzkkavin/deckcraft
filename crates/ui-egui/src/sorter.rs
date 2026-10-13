@@ -4,6 +4,7 @@ use egui::{Align2, Color32, CornerRadius, Rect, Sense, Stroke, Ui, pos2, vec2};
 use serde_json::json;
 
 use crate::SlideApp;
+use crate::i18n::tr;
 use crate::theme::{self, Tokens};
 
 /// Grid of slides; click selects, double-click opens in Normal view, drag reorders.
@@ -137,7 +138,7 @@ pub fn notes_page(app: &mut SlideApp, ui: &mut Ui) {
     let mut buf: String = child.data_mut(|d| d.get_temp(id).unwrap_or_else(|| current.clone()));
     let r = child.add(
         egui::TextEdit::multiline(&mut buf)
-            .hint_text("Click to add text")
+            .hint_text(tr("Click to add text"))
             .desired_width(notes_rect.width())
             .desired_rows(12)
             .frame(egui::Frame::NONE)
