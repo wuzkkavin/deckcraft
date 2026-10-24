@@ -2079,6 +2079,8 @@ mod slide_size_tests;
 mod texture_limit_tests;
 #[cfg(test)]
 mod ui_soak_tests;
+#[cfg(test)]
+mod zh_shots;
 
 #[cfg(test)]
 #[path = "datetime_tests.rs"]
