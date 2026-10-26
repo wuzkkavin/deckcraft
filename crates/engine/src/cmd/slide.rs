@@ -373,7 +373,7 @@ fn select_slides(s: &mut Session, p: &Value) -> Result<Value> {
 }
 
 fn hide(s: &mut Session, p: &Value) -> Result<Value> {
-    let targets: Vec<usize> = match usize_param(p, "index") {
+    let targets: Vec<usize> = match opt_usize_param(p, "index", "slide.hide")? {
         Some(i) => vec![i],
         None => {
             let st = s.doc()?;
@@ -442,7 +442,7 @@ pub fn apply_layout(doc: &mut Presentation, index: usize, layout: LayoutId) -> R
 
 fn set_layout(s: &mut Session, p: &Value) -> Result<Value> {
     let key = p.get("layout").cloned().ok_or_else(|| bad("slide.layout", "missing `layout`"))?;
-    let targets: Vec<usize> = match usize_param(p, "index") {
+    let targets: Vec<usize> = match opt_usize_param(p, "index", "slide.layout")? {
         Some(i) => vec![i],
         None => {
             let st = s.doc()?;
@@ -539,9 +539,9 @@ fn section_add(s: &mut Session, p: &Value) -> Result<Value> {
         if doc.sections.is_empty() {
             // The slides before `at` go into a "Default Section".
             if at > 0 {
-                doc.sections.push(Section { name: "Default Section".into(), slides: ids.get(..at).map(|x| x.to_vec()).unwrap_or_default() });
+                doc.sections.push(Section { name: "Default Section".into(), slides: ids.get(..at).map(<[_]>::to_vec).unwrap_or_default() });
             }
-            doc.sections.push(Section { name, slides: ids.get(at..).map(|x| x.to_vec()).unwrap_or_default() });
+            doc.sections.push(Section { name, slides: ids.get(at..).map(<[_]>::to_vec).unwrap_or_default() });
         } else {
             let Some(start) = ids.get(at).copied() else { return Err(bad("section.add", "no slide")) };
             let si = doc.section_of(start).unwrap_or(0);

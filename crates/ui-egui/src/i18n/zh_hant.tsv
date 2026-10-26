@@ -1370,6 +1370,7 @@ size (pt)	大小 (pt)
 “{}” is not available yet.	“{}”尚無法使用。
 ← Back to {}	← 返回 {}
 ▶ Play All	▶ 全部播放
+▶ Play From	▶ 從此播放
 ◀ Previous	◀ 上一張
 ✏ on	✏ 開啟
 New	新增
@@ -1484,6 +1485,7 @@ Options	選項
 3-D Format	3-D 格式
 3-D Rotation	3-D 旋轉
 Accept	接受
+Reject	拒絕
 Accept\nAll	接受\n全部
 Action Settings…	動作設定…
 Add	新增
@@ -1582,6 +1584,7 @@ Repeated word	重複字詞
 Replace	取代
 Replace All	全部取代
 Replace fractions (1/2) with fraction characters (½)	以分數字元（½）取代分數（1/2）
+Automatic bulleted and numbered lists	自動項目符號與編號清單
 Replace text as you type	隨打即換文字
 Replace:	取代：
 Replace…	取代…
@@ -1596,6 +1599,7 @@ Search icons	搜尋圖示
 Select a SmartArt graphic to edit its text.	選取 SmartArt 圖形以編輯其文字。
 Set	設定
 Set Transparent Color	設定透明色彩
+Click a colour in the picture to make it transparent	按一下圖片中的色彩即可設為透明
 Settings	設定
 Size and Position…	大小及位置…
 Snap	貼齊
@@ -1631,6 +1635,7 @@ Still opening {}	仍在開啟 {}
 Stopped opening {}	已停止開啟 {}
 The Eyedropper takes colours from a slide	滴管從投影片取得色彩
 Eyedropper: click the slide (Esc cancels)	滴管：按一下投影片（Esc 取消）
+Set Transparent Color: click the colour in the picture (Esc cancels)	設定透明色彩：按一下圖片中的色彩（Esc 取消）
 Start: {}s, End: {}s	開始： {} 秒，結束： {} 秒
 New Window needs an open presentation	新視窗需要已開啟的簡報
 New Window needs a slide	新視窗需要一張投影片
@@ -1640,3 +1645,73 @@ AutoCorrect Options…	自動校正選項…
 ■ Stop	■ 停止
 ↳ {}: {}	↳ {}：{}
 {} — {}	{} — {}
+Reuse Slides	重複使用投影片
+Reuse Slides…	重複使用投影片…
+Reuse Slides (Keep Source Formatting)…	重複使用投影片（保留來源格式）…
+id:app.reuseSlidesDialog	重複使用投影片…
+Insert slides from {} after the current slide:	從 {} 插入投影片到目前投影片之後：
+Select None	全部不選
+Keep source formatting	保留來源格式
+Tick at least one slide to insert	請至少勾選一張投影片再插入
+Number:	數目：
+Spacing (in):	間距（英吋）：
+Number must be a whole number from 1 to 16	數目必須是 1 到 16 的整數
+Spacing must be from 0 to 22 inches	間距必須在 0 到 22 英吋之間
+Find what:	尋找目標：
+More Columns…	更多欄…
+{} Column{}	{} 欄{}
+Choosing a presentation to reuse needs the desktop app	選擇要重複使用的簡報需要桌面版應用程式
+Reuse Slides needs the desktop app	重複使用投影片需要桌面版應用程式
+Accept All ({})	全部接受 ({})
+Reject All ({})	全部拒絕 ({})
+Zoom level	縮放比例
+Outline/RTF (.rtf)	大綱／RTF（.rtf）
+Outline/RTF (*.rtf)	大綱／RTF（*.rtf）
+The slide titles and bullet text for word processors	投影片標題與項目符號文字，供文書處理軟體使用
+Straight Segment	直線段
+Curved Segment	曲線段
+Add Point	新增點
+Delete Segment	刪除段
+Close Path	閉合路徑
+Open Path	開啟路徑
+Pattern	圖樣
+Foreground color	前景色彩
+Background color	背景色彩
+Light horizontal	淺色水平線
+Light vertical	淺色垂直線
+Dark horizontal	深色水平線
+Dark vertical	深色垂直線
+Narrow horizontal	窄水平線
+Narrow vertical	窄垂直線
+Dashed horizontal	虛線水平線
+Dashed vertical	虛線垂直線
+Downward diagonal	向下對角線
+Upward diagonal	向上對角線
+Light downward diagonal	淺色向下對角線
+Light upward diagonal	淺色向上對角線
+Dark downward diagonal	深色向下對角線
+Dark upward diagonal	深色向上對角線
+Wide downward diagonal	寬向下對角線
+Wide upward diagonal	寬向上對角線
+Dashed downward diagonal	虛線向下對角線
+Dashed upward diagonal	虛線向上對角線
+Diagonal cross	對角十字
+Small checkerboard	小棋盤格
+Large checkerboard	大棋盤格
+Small grid	小格線
+Large grid	大格線
+Dotted grid	點狀格線
+Small confetti	小五彩紙屑
+Large confetti	大五彩紙屑
+Horizontal brick	水平磚塊
+Diagonal brick	對角磚塊
+Solid diamond	實心菱形
+Outlined diamond	空心菱形
+Dotted diamond	點狀菱形
+Plaid	格子呢
+Sphere	球體
+Weave	編織
+Divot	凹痕
+Shingle	木瓦
+Trellis	格架
+Zig zag	之字形
